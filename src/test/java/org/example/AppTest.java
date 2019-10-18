@@ -137,7 +137,7 @@ public class AppTest {
 
 
     @Test
-    public void shouldValidateObject() {
+    public void shouldValidatePostObject() {
         String basePath = "http://localhost:65535";
 
         String postsEndpoint = "http://localhost:65535/posts/{id}";
@@ -150,7 +150,33 @@ public class AppTest {
 
         System.out.println(response.getBody().jsonPath().get("userId").toString());
         System.out.println(response.getBody().jsonPath().get("id").toString());
-        System.out.println(response.getBody().jsonPath().get("title").toString());
+        System.out.println(response.getBody().jsonPath().get("title").toString() + "\n\n\n\n");
+
+        System.out.println(response.getBody().jsonPath().getObject("$", JsonPost.class).body);
+        System.out.println(response.getBody().jsonPath().getObject("$", JsonPost.class).id);
+
+        assertTrue( true );
+    }
+
+
+    @Test
+    public void shouldValidatePostObject() {
+        String basePath = "http://localhost:65535";
+
+        String postsEndpoint = "http://localhost:65535/posts/{id}";
+
+        Response response = RestAssured.
+                given().contentType(ContentType.JSON).accept(ContentType.JSON).
+                basePath(basePath).
+                when().
+                pathParams("id", 5).get(postsEndpoint).andReturn();
+
+        System.out.println(response.getBody().jsonPath().get("userId").toString());
+        System.out.println(response.getBody().jsonPath().get("id").toString());
+        System.out.println(response.getBody().jsonPath().get("title").toString() + "\n\n\n\n");
+
+        System.out.println(response.getBody().jsonPath().getObject("$", JsonPost.class).body);
+        System.out.println(response.getBody().jsonPath().getObject("$", JsonPost.class).id);
 
         assertTrue( true );
     }
