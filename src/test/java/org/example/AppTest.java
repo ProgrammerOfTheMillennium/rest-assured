@@ -4,7 +4,6 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
-import static io.restassured.RestAssured.given;
 
 import org.example.json.Post;
 import org.example.json.User;
@@ -28,6 +27,7 @@ DELETE 	/posts/1
 
 Note: you can view detailed examples here - https://jsonplaceholder.typicode.com/guide.html.
 
+git show --pretty="" --name-only <commit_hash>
 
 JsonPATH info:
                 https://goessner.net/articles/JsonPath/
@@ -67,14 +67,6 @@ REST Assured best practice:
                                 when().
                                 post("/reserve/{userId}/{id}", 54).
                                 then().
-
-
-Docker JSON Server:
-        sudo apt-get install docker
-        sudo docker ps
-        sudo docker stop <id>
-        sudo docker run -d -p 65535:80 -v /home/bulat/IdeaProjects/docker-json-server/db.json:/data/db.json clue/json-server
-
  */
 
 
@@ -100,34 +92,6 @@ public class AppTest {
 
     @Test
     public void shouldAnswerWithTrue() {
-//        JsonPost jsonPost = RestAssured.
-//                when().
-//                get(endpoint).
-//                jsonPath().
-//                getObject("posts", JsonPost.class);
-
-
-//        JsonPost jsonPost = RestAssured.
-//                given().contentType(ContentType.JSON).accept(ContentType.JSON).
-//                get(endpoint).
-//                jsonPath().
-//                getObject("/posts/1", JsonPost.class);
-//
-//        System.out.println(jsonPost.body);
-
-
-
-
-
-
-//        JsonPost jsonPost = RestAssured.given().
-//                get(endpoint).
-//                jsonPath().
-//                getObject("posts/1", JsonPost.class);
-
-
-
-
         String endpoint = "http://localhost:65535/posts/1";
 
         Response response = RestAssured.
