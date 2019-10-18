@@ -1,6 +1,9 @@
 package org.example.json;
 
-public class JsonPost {
+import lombok.*;
+
+@Getter @Setter
+public class Post {
     public int userId;
     public int id;
     public String title;

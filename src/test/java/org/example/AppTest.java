@@ -6,14 +6,11 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import static io.restassured.RestAssured.given;
 
-import org.example.json.JsonPost;
+import org.example.json.Post;
+import org.example.json.User;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
-
-import java.net.URL;
-import java.util.Date;
-import java.util.Map;
 
 /*
 Routes
@@ -40,13 +37,40 @@ JsonPATH info:
                 https://www.programcreek.com/java-api-examples/index.php?api=io.restassured.path.json.JsonPath
 
 
+Lombok:
+            https://habr.com/ru/post/438870/
 
-REST Assured best practice -    https://habr.com/ru/post/421005/
-                                https://github.com/rest-assured/rest-assured/wiki/usage
-                                https://github.com/rest-assured/rest-assured/wiki/Usage#json-using-jsonpath
+Gson:
+            https://futurestud.io/tutorials/gson-mapping-of-nested-objects
+            https://www.mkyong.com/java/how-do-convert-java-object-to-from-json-format-gson-api/
+
+
+
+REST Assured best practice:
+                    https://habr.com/ru/post/421005/
+                    https://github.com/rest-assured/rest-assured/wiki/usage
+                    https://github.com/rest-assured/rest-assured/wiki/Usage#json-using-jsonpath
+                    https://stackoverflow.com/questions/21725093/rest-assured-deserialize-response-json-as-listpojo
+
+                    https://github.com/rest-assured/rest-assured/wiki/usage#multi-value-parameter
+                    https://github.com/rest-assured/rest-assured/wiki/usage#verifying-response-data
+
+                                given().
+                                pathParam("userId", 2).
+                                pathParam("id", 6).
+                                when().
+                                post("/posts/{userId}/{id}").
+                                then().
+
+                                given().
+                                pathParam("userId", 1).
+                                when().
+                                post("/reserve/{userId}/{id}", 54).
+                                then().
 
 
 Docker JSON Server:
+        sudo apt-get install docker
         sudo docker ps
         sudo docker stop <id>
         sudo docker run -d -p 65535:80 -v /home/bulat/IdeaProjects/docker-json-server/db.json:/data/db.json clue/json-server
@@ -152,31 +176,37 @@ public class AppTest {
         System.out.println(response.getBody().jsonPath().get("id").toString());
         System.out.println(response.getBody().jsonPath().get("title").toString() + "\n\n\n\n");
 
-        System.out.println(response.getBody().jsonPath().getObject("$", JsonPost.class).body);
-        System.out.println(response.getBody().jsonPath().getObject("$", JsonPost.class).id);
+        System.out.println(response.getBody().jsonPath().getObject("$", Post.class).body);
+        System.out.println(response.getBody().jsonPath().getObject("$", Post.class).id);
 
         assertTrue( true );
     }
 
 
     @Test
-    public void shouldValidatePostObject() {
-        String basePath = "http://localhost:65535";
-
-        String postsEndpoint = "http://localhost:65535/posts/{id}";
+    public void shouldValidateUsersObject() {
+        String postsEndpoint = "http://localhost:65535/users/{id}";
 
         Response response = RestAssured.
                 given().contentType(ContentType.JSON).accept(ContentType.JSON).
-                basePath(basePath).
                 when().
-                pathParams("id", 5).get(postsEndpoint).andReturn();
+                pathParams("id", 7).get(postsEndpoint).
+                andReturn();
 
-        System.out.println(response.getBody().jsonPath().get("userId").toString());
-        System.out.println(response.getBody().jsonPath().get("id").toString());
-        System.out.println(response.getBody().jsonPath().get("title").toString() + "\n\n\n\n");
+        User usr = response.getBody().jsonPath().getObject("$", User.class);
 
-        System.out.println(response.getBody().jsonPath().getObject("$", JsonPost.class).body);
-        System.out.println(response.getBody().jsonPath().getObject("$", JsonPost.class).id);
+        System.out.println(usr.getUsername());
+        System.out.println(usr.getEmail());
+        System.out.println(usr.getPhone());
+        System.out.println(usr.getWebsite() + "\n");
+
+        System.out.println(usr.getAddress().getStreet());
+        System.out.println(usr.getAddress().getCity());
+        System.out.println(usr.getAddress().getZipcode());
+        System.out.println(usr.getAddress().getSuit()+"\n");
+
+        System.out.println(usr.getAddress().getGeo().getLat());
+        System.out.println(usr.getAddress().getGeo().getLng());
 
         assertTrue( true );
     }
@@ -185,23 +215,5 @@ public class AppTest {
 
 
 
-
-
-
-//https://github.com/rest-assured/rest-assured/wiki/usage#multi-value-parameter
-//https://github.com/rest-assured/rest-assured/wiki/usage#verifying-response-data
-
-//        given().
-//        pathParam("userId", 2).
-//        pathParam("id", 6).
-//        when().
-//        post("/posts/{userId}/{id}").
-//        then().
-
-//        given().
-//        pathParam("userId", 1).
-//        when().
-//        post("/reserve/{userId}/{id}", 54).
-//        then().
 
 
