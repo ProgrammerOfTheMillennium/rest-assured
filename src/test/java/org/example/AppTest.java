@@ -1,183 +1,195 @@
 package org.example;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.response.Response;
+/**
+ * Created by Bulat Latypov.
+ *
 
-import org.example.json.Post;
-import org.example.json.User;
-import org.testng.annotations.BeforeMethod;
+ I use Lombok library for Getters, Setters. So install the plugin into Intellij IDEA:
+         1. In the Settings/Preferences dialog (Ctrl+Alt+S), select Plugins
+         2. Write Lombok
+         3. Install the plugin
+
+ If you have 404, 505 HTTP status codes then restart the Docker:
+     1. sudo docker ps
+     2. Copy the <container_id>
+     3. sudo docker stop <container_id>
+     4. Check your path to docker folder with <pwd> command
+     5. sudo docker run -d -p 65535:80 -v /home/<YOUR_PATH_TO_PROJECT>/rest-assured/docker-json-server/db.json:/data/db.json clue/json-server
+     6. Run tests
+ */
+
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
-/*
-Routes
+import org.example.json.Post;
+import org.example.json.User;
 
-All HTTP methods are supported.
-GET 	/posts
-GET 	/posts/1
-GET 	/posts/1/comments
-GET 	/comments?postId=1
-GET 	/posts?userId=1
-POST 	/posts
-PUT 	/posts/1
-PATCH 	/posts/1
-DELETE 	/posts/1
-
-Note: you can view detailed examples here - https://jsonplaceholder.typicode.com/guide.html.
-
-git show --pretty="" --name-only <commit_hash>
-
-JsonPATH info:
-                https://goessner.net/articles/JsonPath/
-                https://support.smartbear.com/alertsite/docs/monitors/api/endpoint/jsonpath.html
-
-                https://www.baeldung.com/guide-to-jayway-jsonpath
-                https://www.programcreek.com/java-api-examples/index.php?api=io.restassured.path.json.JsonPath
-
-
-Lombok:
-            https://habr.com/ru/post/438870/
-
-Gson:
-            https://futurestud.io/tutorials/gson-mapping-of-nested-objects
-            https://www.mkyong.com/java/how-do-convert-java-object-to-from-json-format-gson-api/
-
-
-
-REST Assured best practice:
-                    https://habr.com/ru/post/421005/
-                    https://github.com/rest-assured/rest-assured/wiki/usage
-                    https://github.com/rest-assured/rest-assured/wiki/Usage#json-using-jsonpath
-                    https://stackoverflow.com/questions/21725093/rest-assured-deserialize-response-json-as-listpojo
-
-                    https://github.com/rest-assured/rest-assured/wiki/usage#multi-value-parameter
-                    https://github.com/rest-assured/rest-assured/wiki/usage#verifying-response-data
-
-                                given().
-                                pathParam("userId", 2).
-                                pathParam("id", 6).
-                                when().
-                                post("/posts/{userId}/{id}").
-                                then().
-
-                                given().
-                                pathParam("userId", 1).
-                                when().
-                                post("/reserve/{userId}/{id}", 54).
-                                then().
- */
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class AppTest {
 
-    @BeforeMethod
+    @BeforeTest
     public void setup() {
-//        jsonPath
-
-    }
-//    String endpoint = "http://localhost:65535/posts/{id}";
-//    http://localhost:65535/db/$/posts
-
-
-
-
-
-
-
-
-//    String endpoint = "http://localhost:65535/posts/1";
-//    String endpoint = "http://localhost:65535/db/$/";
-
-    @Test
-    public void shouldAnswerWithTrue() {
-        String endpoint = "http://localhost:65535/posts/1";
-
-        Response response = RestAssured.
-                given().contentType(ContentType.JSON).accept(ContentType.JSON).
-                when().
-                get(endpoint).
-                andReturn();
-
-        JsonPath jsonPath = new JsonPath(response.body().asString());
-
-        System.out.println(jsonPath.toString() + "\n");
-        System.out.println(jsonPath.get("userId").toString());
-        System.out.println(jsonPath.get("id").toString());
-        System.out.println(jsonPath.get("title").toString());
-        System.out.println(jsonPath.get("body").toString());
-
-
-
-
-//                then().
-//                assertThat().
-//                statusCode(200);
-
-//                jsonPath().
-//                getObject("posts/1", JsonPost.class);
-
-
-        assertTrue( true );
+//        RestAssured.baseURI = "http://localhost";
+//        RestAssured.basePath = "/posts/";
+//        RestAssured.port = 65535;
     }
 
 
 
     @Test
     public void shouldValidatePostObject() {
-        String basePath = "http://localhost:65535";
-
         String postsEndpoint = "http://localhost:65535/posts/{id}";
 
-        Response response = RestAssured.
+        Response response =
                 given().contentType(ContentType.JSON).accept(ContentType.JSON).
-                basePath(basePath).
                 when().
-                pathParams("id", 5).get(postsEndpoint).andReturn();
+                    pathParams("id", 5).
+                    get(postsEndpoint).
+                then().
+                    assertThat().statusCode(200).
+                    extract().response();
 
-        System.out.println(response.getBody().jsonPath().get("userId").toString());
-        System.out.println(response.getBody().jsonPath().get("id").toString());
-        System.out.println(response.getBody().jsonPath().get("title").toString() + "\n\n\n\n");
+        Post pst = response.getBody().jsonPath().getObject("$", Post.class);
 
-        System.out.println(response.getBody().jsonPath().getObject("$", Post.class).body);
-        System.out.println(response.getBody().jsonPath().getObject("$", Post.class).id);
-
-        assertTrue( true );
+        assertNotNull(pst.getTitle());
     }
 
 
     @Test
-    public void shouldValidateUsersObject() {
-        String postsEndpoint = "http://localhost:65535/users/{id}";
+    public void shouldGetUsersObject() {
+        String usersEndpoint = "http://localhost:65535/users/{id}";
 
-        Response response = RestAssured.
-                given().contentType(ContentType.JSON).accept(ContentType.JSON).
+        Response response = given().contentType(ContentType.JSON).accept(ContentType.JSON).
                 when().
-                pathParams("id", 7).get(postsEndpoint).
-                andReturn();
+                    pathParams("id", 7).
+                    get(usersEndpoint).
+                then().
+                    assertThat().statusCode(200).
+                    extract().response();
+
 
         User usr = response.getBody().jsonPath().getObject("$", User.class);
 
-        System.out.println(usr.getUsername());
-        System.out.println(usr.getEmail());
-        System.out.println(usr.getPhone());
-        System.out.println(usr.getWebsite() + "\n");
+        assertNotNull(usr.getUsername());
+        assertNotNull(usr.getEmail());
+        assertNotNull(usr.getPhone());
+        assertNotNull(usr.getWebsite() + "\n");
 
-        System.out.println(usr.getAddress().getStreet());
-        System.out.println(usr.getAddress().getCity());
-        System.out.println(usr.getAddress().getZipcode());
-        System.out.println(usr.getAddress().getSuit()+"\n");
+        assertNotNull(usr.getAddress().getStreet());
+        assertNotNull(usr.getAddress().getCity());
+        assertNotNull(usr.getAddress().getZipcode()+"\n");
 
-        System.out.println(usr.getAddress().getGeo().getLat());
-        System.out.println(usr.getAddress().getGeo().getLng());
+        assertNotNull(usr.getAddress().getGeo().getLat());
+        assertNotNull(usr.getAddress().getGeo().getLng());
+    }
 
-        assertTrue( true );
+    @Test
+    public void shouldPostUsersObject() {
+        String usersEndpoint = "http://localhost:65535/users";
+
+        Map<String, Object> postGeo = new HashMap<>();
+        postGeo.put("lat", "-43.9509");
+        postGeo.put("lng", "-43.9509");
+
+        Map<String, Object> postAddress = new HashMap<>();
+        postAddress.put("street", "Prospect");
+        postAddress.put("suit", "121/3");
+        postAddress.put("city", "Ufa");
+        postAddress.put("zipcode", "580089");
+        postAddress.put("geo", postGeo);
+
+        Map<String, Object> postCompany = new HashMap<>();
+        postCompany.put("name", "WRTech");
+        postCompany.put("catchPhrase", "IPTV");
+        postCompany.put("bs", "Software");
+
+        Map<String, Object> postUser = new HashMap<>();
+        postUser.put("id", 11);
+        postUser.put("name", "Bulat Latypov");
+        postUser.put("username", "Bulat");
+        postUser.put("email", "wrtech@ya.ru");
+        postUser.put("phone", "+7 777 777 77 77");
+        postUser.put("website", "https://www.website.com");
+
+        postUser.put("address", postAddress);
+        postUser.put("company", postCompany);
+
+        Response response =
+                given().
+                    contentType(ContentType.JSON).accept(ContentType.JSON).
+                    body(postUser).
+                when().
+                    post(usersEndpoint).
+                then().
+                    assertThat().statusCode(201). // if 505 you already created the User JSON Object  - restart Docker
+                    extract().response();
+
+        User usr = response.getBody().jsonPath().getObject("$", User.class);
+
+        assertEquals(postUser.get("username"), usr.getUsername());
+        assertEquals(postUser.get("name"), usr.getName());
+        assertEquals(postUser.get("email"),usr.getEmail());
+        assertEquals(postUser.get("phone"),usr.getPhone());
+        assertEquals(postUser.get("website"),usr.getWebsite());
+    }
+
+    @Test
+    public void shouldPutPostObjectValue() {
+        int postId = 1;
+        String postEndpoint = "http://localhost:65535/posts/{id}";
+
+        Map<String, Object> putPost = new HashMap<>();
+        putPost.put("userId", postId);
+        putPost.put("id", postId);
+        putPost.put("title", "Exploring REST Assured API.");
+        putPost.put("body", "This is a put REST API request.");
+
+        Response response =
+                given().
+                    contentType(ContentType.JSON).accept(ContentType.JSON).
+                    body(putPost).
+                when().
+                    pathParams("id", postId).
+                    put(postEndpoint).
+                then().
+                    assertThat().statusCode(200).
+                    extract().response();
+
+        Post pst = response.getBody().jsonPath().getObject("$", Post.class);
+
+        assertEquals(putPost.get("title"), pst.getTitle());
+        assertEquals(putPost.get("body"), pst.getBody());
+    }
+
+    @Test
+    public void shouldDeletePostObject() {
+        int postId = 3;
+        String postEndpoint = "http://localhost:65535/posts/{id}";
+
+        Response response =
+                given().
+                    contentType(ContentType.JSON).accept(ContentType.JSON).
+                when().
+                    pathParams("id", postId).
+                    delete(postEndpoint).
+                then().
+                    assertThat().statusCode(200). //if 404 you already deleted the Post JSON Object - restart Docker
+                    extract().response();
+
+        Post pst = response.getBody().jsonPath().getObject("$", Post.class);
+
+        assertNull(pst.getBody());
+        assertNull(pst.getTitle());
     }
 }
-
-
-
 
 
 

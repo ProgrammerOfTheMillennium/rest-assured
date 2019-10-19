@@ -6,7 +6,7 @@ This is a [docker](https://www.docker.io) image that eases setup.
     sudo apt-get install docker
 
     Run and Install server:
-        sudo docker run -d -p 65535:80 -v /home/bulat/IdeaProjects/docker-json-server/db.json:/data/db.json clue/json-server
+        sudo docker run -d -p 65535:80 -v /home/bulat/IdeaProjects/rest-assured/docker-json-server/db.json:/data/db.json clue/json-server
 
     Open link in the browser:
         http://localhost:65535
@@ -23,6 +23,7 @@ This is a [docker](https://www.docker.io) image that eases setup.
     
 
     Uninstall Docker from OS:
+        sudo docker system prune -a
         sudo apt-get purge docker-ce
         sudo rm -rf /var/lib/docker 
 ```
